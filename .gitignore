@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Django
+db.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+
+# Environment
+.env
+.env.*
+
+# VSCode/IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Virtualenv
+venv/
+ENV/
+.venv/
+
+# Node/npm (if added frontend)
+node_modules/
+
+# Coverage/test
+htmlcov/
+.coverage
+.tox/
+
+# Misc
+*.bak
+*.swp
+*.tmp
+
+# MongoDB dump
+*.bson
+*.json
+
+docs/screenshots/

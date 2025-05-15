@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Timetable Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 2em;
+            background: #f5f7fa;
+        }
+        h1, h2 {
+            color: #2d3a4b;
+        }
+        .result {
+            margin-top: 2em;
+        }
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1em;
+            width: 100%;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #e0e4ea;
+            padding: 0.7em 0.5em;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        th {
+            background: #e9eef6;
+            color: #2d3a4b;
+            font-size: 1.08em;
+            font-weight: 600;
+        }
+        tr:hover td {
+            background: #f2f7fd;
+        }
+        .tt-cell {
+            padding: 0.2em 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 6px;
+        }
+        .tt-cell:hover {
+            background: #f3faff;
+            transform: scale(1.045);
+            box-shadow: 0 2px 8px rgba(30,144,255,0.07);
+        }
+        .tt-subject {
+            font-weight: bold;
+            color: #0057b8;
+            font-size: 1.05em;
+        }
+        .tt-teacher {
+            color: #444;
+            font-size: 0.97em;
+            letter-spacing: 0.01em;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        .tt-refresh-btn {
+            background: linear-gradient(90deg,#0057b8,#00c6fb);
+            color: #fff;
+            border: none;
+            padding: 0.6em 1.3em;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 1.5em;
+            margin-right: 1em;
+            box-shadow: 0 2px 8px rgba(0,87,184,0.08);
+            transition: background 0.2s, transform 0.2s;
+        }
+        .tt-refresh-btn:hover {
+            background: linear-gradient(90deg,#00c6fb,#0057b8);
+            transform: translateY(-2px) scale(1.04);
+        }
+    </style>
+</head>
+<body>
+    <h1>AI School Timetable Generator</h1>
+    <button class="tt-refresh-btn" id="refresh-btn">🔄 Generate Timetable</button>
+    <div class="result" id="result"></div>
+
+    <script>
+    function generateTimetable() {
+        document.getElementById('result').innerHTML = 'Generating...';
+        fetch('/scheduler/generate-timetable/', {method: 'POST'})
+            .then(resp => {
+                if (!resp.ok) throw new Error('Network error');
+                return resp.json();
+            })
+            .then(data => {
+                if (data.status !== 'ok') {
+                    document.getElementById('result').innerHTML = '<span class="error">No feasible timetable found.</span>';
+                    return;
+                }
+                // Timetable grid rendering
+                const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                const PERIODS = [
+                    { label: "07h30-09h30", key: "1st_period" },
+                    { label: "09h30-11h30", key: "2nd_period" },
+                    { label: "12h45-14h45", key: "3rd_period" },
+                    { label: "14h45-16h30", key: "4th_period" }
+                ];
+                // Group timetable by class
+                const classMap = {};
+                for (const day in data.timetable) {
+                  for (const period in data.timetable[day]) {
+                    for (const assign of data.timetable[day][period]) {
+                      const classId = assign.class_id;
+                      const classLabel = assign.class_label || classId;
+                      if (!classMap[classId]) {
+                        classMap[classId] = { label: classLabel, table: {} };
+                      }
+                      if (!classMap[classId].table[day]) classMap[classId].table[day] = {};
+                      if (!classMap[classId].table[day][period]) classMap[classId].table[day][period] = [];
+                      classMap[classId].table[day][period].push(assign);
+                    }
+                  }
+                }
+                let html = '<h2>Generated Timetables (per class)</h2>';
+                const sortedClassIds = Object.keys(classMap).sort((a, b) => {
+  const labelA = classMap[a].label.toUpperCase();
+  const labelB = classMap[b].label.toUpperCase();
+  if (labelA < labelB) return -1;
+  if (labelA > labelB) return 1;
+  return 0;
+});
+for (const classId of sortedClassIds) {
+                  html += `<h3 style="margin-top:2.5em;">${classMap[classId].label}</h3>`;
+                  html += '<table><tr><th>TRANCHES HORAIRES</th>';
+                  for (const day of DAYS) {
+                    html += `<th>${day}</th>`;
+                  }
+                  html += '</tr>';
+                  // Morning periods
+                  for (let i = 0; i < 2; ++i) {
+                    html += `<tr><td>${PERIODS[i].label}</td>`;
+                    for (const day of DAYS) {
+                      const assigns = (classMap[classId].table[day] && classMap[classId].table[day][PERIODS[i].key]) || [];
+                      if (assigns.length > 0) {
+                        html += '<td>' + assigns.map(a => `<div class="tt-cell"><span class="tt-subject">${a.subject_name || ''}</span><br><span class="tt-teacher">${a.teacher_name || ''}</span></div>`).join('<hr>') + '</td>';
+                      } else {
+                        html += '<td></td>';
+                      }
+                    }
+                    html += '</tr>';
+                  }
+                  // PAUSE row
+                  html += `<tr><td colspan="${DAYS.length + 1}" style="background:#eee;font-weight:bold;text-align:center;">PAUSE</td></tr>`;
+                  // Afternoon periods
+                  for (let i = 2; i < PERIODS.length; ++i) {
+                    html += `<tr><td>${PERIODS[i].label}</td>`;
+                    for (const day of DAYS) {
+                      const assigns = (classMap[classId].table[day] && classMap[classId].table[day][PERIODS[i].key]) || [];
+                      if (assigns.length > 0) {
+                        html += '<td>' + assigns.map(a => `<div class="tt-cell"><span class="tt-subject">${a.subject_name || ''}</span><br><span class="tt-teacher">${a.teacher_name || ''}</span></div>`).join('<hr>') + '</td>';
+                      } else {
+                        html += '<td></td>';
+                      }
+                    }
+                    html += '</tr>';
+                  }
+                  html += '</table>';
+                }
+                document.getElementById('result').innerHTML = html;
+            })
+            .catch(() => {
+                document.getElementById('result').innerHTML = '<span class="error">Error generating timetable</span>';
+            });
+    }
+    document.getElementById('refresh-btn').onclick = function(e) {
+        e.preventDefault();
+        generateTimetable();
+    };
+    // Auto-generate on page load
+    window.onload = generateTimetable;
+
+    document.getElementById('generate-form').onsubmit = async function(e) {
+        e.preventDefault();
+        document.getElementById('result').innerHTML = 'Generating...';
+        const resp = await fetch('/scheduler/generate-timetable/', {method: 'POST'});
+        if (!resp.ok) {
+            document.getElementById('result').innerHTML = '<span class="error">Error generating timetable</span>';
+            return;
+        }
+        const data = await resp.json();
+        if (data.status !== 'ok') {
+            document.getElementById('result').innerHTML = '<span class="error">No feasible timetable found.</span>';
+            return;
+        }
+        // Timetable grid rendering
+        const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const PERIODS = [
+            { label: "07h30-09h30", key: "1st_period" },
+            { label: "09h30-11h30", key: "2nd_period" },
+            { label: "12h45-14h45", key: "3rd_period" },
+            { label: "14h45-16h30", key: "4th_period" }
+        ];
+        let html = '<h2>Generated Timetable</h2>';
+        html += '<table><tr><th>TRANCHES HORAIRES</th>';
+        for (const day of DAYS) {
+          html += `<th>${day}</th>`;
+        }
+        html += '</tr>';
+        // Morning periods
+        for (let i = 0; i < 2; ++i) {
+          html += `<tr><td>${PERIODS[i].label}</td>`;
+          for (const day of DAYS) {
+            const assigns = (data.timetable[day] && data.timetable[day][PERIODS[i].key]) || [];
+            if (assigns.length > 0) {
+              html += '<td>' + assigns.map(a => `<b>${a.subject_name || ''}</b><br>${a.teacher_name || ''}`).join('<hr>') + '</td>';
+            } else {
+              html += '<td></td>';
+            }
+          }
+          html += '</tr>';
+        }
+        // PAUSE row
+        html += `<tr><td colspan="${DAYS.length + 1}" style="background:#eee;font-weight:bold;text-align:center;">PAUSE</td></tr>`;
+        // Afternoon periods
+        for (let i = 2; i < PERIODS.length; ++i) {
+          html += `<tr><td>${PERIODS[i].label}</td>`;
+          for (const day of DAYS) {
+            const assigns = (data.timetable[day] && data.timetable[day][PERIODS[i].key]) || [];
+            if (assigns.length > 0) {
+              html += '<td>' + assigns.map(a => `<b>${a.subject_name || ''}</b><br>${a.teacher_name || ''}`).join('<hr>') + '</td>';
+            } else {
+              html += '<td></td>';
+            }
+          }
+          html += '</tr>';
+        }
+        html += '</table>';
+        document.getElementById('result').innerHTML = html;
+    }
+    </script>
+</body>
+</html>

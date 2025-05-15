@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolAI | Smarter Timetables</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(120deg, #f5fafd 0%, #e0e7ff 100%);
+            color: #232946;
+        }
+        header {
+            background: #232946;
+            color: #fff;
+            padding: 2.2rem 0 1.2rem 0;
+            text-align: center;
+            box-shadow: 0 2px 16px rgba(35,41,70,0.07);
+        }
+        header h1 {
+            font-size: 2.6rem;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        header p {
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin: 0.6rem 0 0 0;
+            color: #c3c7ee;
+        }
+        nav {
+            margin-top: 1.2rem;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 1.3rem;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        nav a:hover {
+            color: #a9f1df;
+        }
+        .hero {
+            padding: 4rem 1.5rem 2rem 1.5rem;
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .hero h2 {
+            font-size: 2.1rem;
+            color: #232946;
+            margin-bottom: 1.2rem;
+        }
+        .hero p {
+            font-size: 1.15rem;
+            color: #4f5d75;
+            margin-bottom: 2.2rem;
+        }
+        .cta-btn {
+            background: linear-gradient(90deg,#0057b8,#00c6fb);
+            color: #fff;
+            border: none;
+            padding: 1em 2.5em;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,87,184,0.09);
+            transition: background 0.2s, transform 0.2s;
+        }
+        .cta-btn:hover {
+            background: linear-gradient(90deg,#00c6fb,#0057b8);
+            transform: translateY(-2px) scale(1.04);
+        }
+        footer {
+            background: #232946;
+            color: #c3c7ee;
+            text-align: center;
+            padding: 1.2rem 0 1.2rem 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+            left: 0;
+            font-size: 1rem;
+            letter-spacing: 0.03em;
+        }
+        @media (max-width: 600px) {
+            .hero h2 { font-size: 1.3rem; }
+            header h1 { font-size: 1.5rem; }
+            .hero { padding: 2rem 0.6rem 2rem 0.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SchoolAI</h1>
+        <p>Smarter Timetables. Happier Schools.</p>
+        <nav>
+            <a href="/login/">Login</a>
+            <a href="/signup/">Sign Up</a>
+            <a href="/scheduler/test-timetable/">Try Demo</a>
+        </nav>
+    </header>
+    <section class="hero">
+        <h2>Welcome to SchoolAI</h2>
+        <p>Effortlessly generate, visualize, and manage school timetables using AI. Save hours of manual work, avoid conflicts, and empower your teachers and students with the smartest scheduling platform.</p>
+        <a href="/signup/"><button class="cta-btn">Get Started Free</button></a>
+    </section>
+    <footer>
+        &copy; 2025 SchoolAI. Crafted with <span style="color:#ffb800;">&#9733;</span> for educators.
+    </footer>
+</body>
+</html>
