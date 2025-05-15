@@ -68,7 +68,7 @@ python manage.py runserver
 > _Add your screenshots here!_
 - ![Landing Page](docs/landing.png)
 - ![Timetable UI](docs/timetable.png)
-- ![Login](docs/login.png)
+- ![Login](docs/signin.png)
 - ![Signup](docs/signup.png)
 
 ---
